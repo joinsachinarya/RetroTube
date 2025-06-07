@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Good Old Days",
-    "description": "Filter YouTube and Twitter content by date.",
+    "description": "Time travel on YouTube, X and other platforms",
     "version": "0.0.1",
     "icons": {
         "128": "assets/logo.png"
@@ -15,12 +15,8 @@
     ],
     "host_permissions": [
         "https://www.youtube.com/*",
-        "https://twitter.com/*"
+        "https://x.com/*"
     ],
-    "background": {
-        "service_worker": "background.js",
-        "type": "module"
-    },
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self';"
     },
@@ -30,17 +26,7 @@
                 "https://www.youtube.com/*"
             ],
             "js": [
-                "utils/date-utils.js",
                 "content_scripts/youtube.js"
-            ]
-        },
-        {
-            "matches": [
-                "https://twitter.com/*"
-            ],
-            "js": [
-                "utils/date-utils.js",
-                "content_scripts/twitter.js"
             ]
         }
     ]
