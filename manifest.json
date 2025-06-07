@@ -1,0 +1,47 @@
+{
+    "manifest_version": 3,
+    "name": "Good Old Days",
+    "description": "Filter YouTube and Twitter content by date.",
+    "version": "0.0.1",
+    "icons": {
+        "128": "assets/logo.png"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "assets/logo.png"
+    },
+    "permissions": [
+        "storage"
+    ],
+    "host_permissions": [
+        "https://www.youtube.com/*",
+        "https://twitter.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self';"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.youtube.com/*"
+            ],
+            "js": [
+                "utils/date-utils.js",
+                "content_scripts/youtube.js"
+            ]
+        },
+        {
+            "matches": [
+                "https://twitter.com/*"
+            ],
+            "js": [
+                "utils/date-utils.js",
+                "content_scripts/twitter.js"
+            ]
+        }
+    ]
+}
