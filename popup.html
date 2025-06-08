@@ -6,10 +6,20 @@
 </head>
 
 <body>
-  <h3>Select time range</h3>
-  <label>From <input type="datetime-local" name="timeFrom" id="timeFrom" value="" min="" max=""></label>
-  <label>To <input type="datetime-local" name="timeTo" id="timeTo" value="" min="" max=""></label>
+  <div class="container">
+    <div class="filter-container">
+      <h3>Select time range</h3>
+      <label>From <input type="datetime-local" name="timeFrom" id="timeFrom" value="" min="" max=""></label>
+      <label>To <input type="datetime-local" name="timeTo" id="timeTo" value="" min="" max=""></label>
+    </div>
 
+    <div class="filter-container">
+      <h3>Other filters</h3>
+      <label>Hide Playlists <input type="checkbox" name="hidePlaylists" id="hidePlaylists" onchange="toggleHidePlaylists"></label>
+      <label>Hide Livestreams <input type="checkbox" name="hideLivestreams" id="hideLivestreams" onchange="toggleHideLivestreams"></label>
+      <label>Hide Shorts <input type="checkbox" name="hideShorts" id="hideShorts" onchange="toggleHideShorts"></label>
+    </div>
+  </div>
   <button id="applyButton">Apply Filter</button>
   <script type="module" src="popup.js"></script>
 </body>
