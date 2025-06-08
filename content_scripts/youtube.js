@@ -47,50 +47,77 @@ function getDateFromYoutubeDisplayTime(displayString) {
   console.error("Unrecognized display string: " + displayString);
 }
 
-function filterYouTubeVideos(timeFrom, timeTo) {
-  const videoCards = document.querySelectorAll('#dismissible');
+function filterVideoCard(card, timeFrom, timeTo) {
+  if (card.dataset.filtered === "1") return;
   // const shortVideoCards = document.querySelectorAll('.shortsLockupViewModelHost');
 
-  videoCards.forEach(card => {
-    const dateNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('ago'));
-    const uploadedTime = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
-    if (!dateNode || !uploadedTime) return;
+  const dateNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('ago'));
+  if (!dateNode) return;
+  const uploadedTime = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
+  if (!uploadedTime) return;
 
-    // console.log('uploadedTime2', uploadedTime, timeFrom, timeTo, uploadedTime < timeFrom, uploadedTime > timeTo, card)
-    if (uploadedTime.getTime() < timeFrom.getTime() || uploadedTime.getTime() > timeTo.getTime()) {
-      console.log('result, none')
-      card.style.display = 'none';
-    } else {
-      console.log('result, block')
-      card.style.display = '';
-    }
-  });
-  // shortVideoCards.forEach(()=>{
-  // })
+  console.log('uploadedTime', uploadedTime, timeFrom, timeTo, uploadedTime < timeFrom, uploadedTime > timeTo, card)
+  if (uploadedTime < timeFrom || uploadedTime > timeTo) {
+    card.style.display = 'none';
+  } else {
+    card.style.display = '';
+  }
+
+  card.dataset.filtered = "1";
 }
 
-function loadSettingsAndFilter() {
+function filterYouTubeVideos(timeFrom, timeTo) {
+  const videoCards = document.querySelectorAll('#dismissible:not([data-filtered="1"])');
+  videoCards.forEach(card => filterVideoCard(card, timeFrom, timeTo));
+}
+
+function loadSettingsAndFilter(targetNodes) {
   chrome.storage.local.get(['timeFrom', 'timeTo'], (data) => {
-    // console.log('data loadSettingsAndFilter', data);
     if (data.timeFrom && data.timeTo && new Date(data.timeFrom) < new Date(data.timeTo)) {
-      filterYouTubeVideos(new Date(data.timeFrom), new Date(data.timeTo));
+      const timeFrom = new Date(data.timeFrom);
+      const timeTo = new Date(data.timeTo);
+      if (targetNodes && targetNodes.length) {
+        // Only filter new/added nodes
+        targetNodes.forEach(node => {
+          if (node.nodeType === 1) { // ELEMENT_NODE
+            // If this node itself is a video card, or contains video cards
+            if (node.matches && node.matches('#dismissible')) {
+              filterVideoCard(node, timeFrom, timeTo);
+            } else {
+              node.querySelectorAll && node.querySelectorAll('#dismissible').forEach(card => filterVideoCard(card, timeFrom, timeTo));
+            }
+          }
+        });
+      } else {
+        // Full re-filter
+        filterYouTubeVideos(timeFrom, timeTo);
+      }
     }
   });
 }
 
+// Initial full filter on load
 loadSettingsAndFilter();
 
-const observer = new MutationObserver(() => {
-  loadSettingsAndFilter();
-})
+// Use observer for only newly added nodes
+const observer = new MutationObserver((mutations) => {
+  const addedNodes = [];
+  mutations.forEach(mutation => {
+    mutation.addedNodes && mutation.addedNodes.forEach(node => addedNodes.push(node));
+  });
+  if (addedNodes.length) {
+    loadSettingsAndFilter(addedNodes);
+  }
+});
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true
-})
+observer.observe(document.body, { childList: true, subtree: true });
 
+// Listen for storage changes (e.g., user updates filter)
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && (changes.timeFrom || changes.timeTo)) {
+    // Remove filter marks to allow re-filtering all cards
+    document.querySelectorAll('#dismissible[data-filtered="1"]').forEach(card => card.removeAttribute('data-filtered'));
     loadSettingsAndFilter();
   }
 });
+
