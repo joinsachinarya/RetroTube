@@ -20,7 +20,6 @@ function initializeInputs() {
 // Load saved settings
 function loadSettings() {
     chrome.storage.local.get(STORAGE_KEYS, (data) => {
-        console.log('data loadSettings', data);
         if (chrome.runtime.lastError) {
             console.error('Error loading settings:', chrome.runtime.lastError);
             return;
@@ -28,7 +27,6 @@ function loadSettings() {
         
         timeFromInput.value = data.timeFrom || '';
         timeToInput.value = data.timeTo || '';
-        console.log('Loaded settings:', data);
     });
 }
 
@@ -38,12 +36,12 @@ function applyFilter() {
     const timeTo = timeToInput.value;
 
     if (!timeFrom || !timeTo) {
-        alert('Please select both start and end times');
+        console.log('Please select both start and end times');
         return;
     }
 
     if (new Date(timeFrom) > new Date(timeTo)) {
-        alert('Start time cannot be after end time');
+        console.log('Start time cannot be after end time');
         return;
     }
 
@@ -53,7 +51,7 @@ function applyFilter() {
             return;
         }
         
-        alert('Filter applied! Changes will be visible automatically.');
+        console.log('Filter applied! Changes will be visible automatically.');
     });
 }
 

@@ -3,6 +3,7 @@
     "name": "Good Old Days",
     "description": "Time travel on YouTube, X and other platforms",
     "version": "0.0.1",
+    "type": "module",
     "icons": {
         "128": "assets/logo.png"
     },
