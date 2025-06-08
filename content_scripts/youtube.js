@@ -1,16 +1,16 @@
-import { getUploadedTime } from "../utils/get-ytv-uploaded-time";
+import { getDateFromYoutubeDisplayTime } from "../utils/get-ytv-uploaded-time";
 
-// Filter function for all video cards
 function filterYouTubeVideos(fromYear, toYear) {
-  const videoCards = document.querySelectorAll('ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer');
+  const videoCards = document.querySelectorAll('style-scope ytd-rich-grid-renderer');
   videoCards.forEach(card => {
-    // Find the node that contains the date info
-    const dateNode = Array.from(card.querySelectorAll('#metadata-line span'))
-      .find(span => /\d/.test(span.textContent));
+    const dateNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => /\d/.test(span.textContent));
+    console.log('dateNode', dateNode)
     if (!dateNode) return;
 
-    const year = getUploadedTime(dateNode.textContent.trim());
-    if (year && (year < fromYear || year > toYear)) {
+    const uploadedTime = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
+
+    console.log('uploadedTime', uploadedTime)
+    if (uploadedTime && (uploadedTime.getFullYear() < fromYear || uploadedTime.getFullYear() > toYear)) {
       card.style.display = 'none';
     } else {
       card.style.display = '';
@@ -18,32 +18,28 @@ function filterYouTubeVideos(fromYear, toYear) {
   });
 }
 
-// Load user settings
 function loadSettingsAndFilter() {
-  chrome.storage.sync.get(['fromYear', 'toYear'], (data) => {
-    if (data.fromYear && data.toYear) {
-      filterYouTubeVideos(data.fromYear, data.toYear);
+  chrome.storage.sync.get(['timeFrom', 'timeTo'], (data) => {
+    console.log('data loadSettingsAndFilter', data);
+    if (data.timeFrom && data.timeTo) {
+      filterYouTubeVideos(data.timeFrom, data.timeTo);
     }
   });
 }
 
-// Initial run
 loadSettingsAndFilter();
 
-// Setup MutationObserver to auto-reapply filter as videos load dynamically
-const observer = new MutationObserver((mutations) => {
-  // Optionally, you can be even more efficient and only process nodes with added video cards
+const observer = new MutationObserver(() => {
   loadSettingsAndFilter();
-});
+})
 
 observer.observe(document.body, {
   childList: true,
   subtree: true
-});
+})
 
-// Optional: re-apply filter when user updates settings via popup (real-time update)
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && (changes.fromYear || changes.toYear)) {
+  if (area === 'sync' && (changes.timeFrom || changes.timeTo)) {
     loadSettingsAndFilter();
   }
 });
