@@ -1,4 +1,5 @@
 // Utility: extract year from "X years ago" or date string
+console.log('youtube.js');
 function getYearFromText(text) {
   const now = new Date();
   if (/(\d+)\s*years?\s*ago/.test(text)) {

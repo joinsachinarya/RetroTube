@@ -1,19 +1,18 @@
 body {
-    min-width: 200px;
-    font-family: sans-serif;
-    padding: 10px;
-  }
-  label {
-    display: block;
-    margin-bottom: 8px;
-  }
-  input {
-    width: 60px;
-    margin-left: 8px;
-  }
-  button {
-    margin-top: 12px;
-    width: 100%;
-    padding: 6px 0;
-  }
-  
+  min-width: 200px;
+  font-family: sans-serif;
+  padding: 10px;
+}
+label {
+  display: block;
+  margin-bottom: 8px;
+}
+input {
+  width: 60px;
+  margin-left: 8px;
+}
+button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 6px 0;
+}
