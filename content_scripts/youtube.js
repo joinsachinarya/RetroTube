@@ -1,18 +1,4 @@
-// Utility: extract year from "X years ago" or date string
-console.log('youtube.js');
-function getYearFromText(text) {
-  const now = new Date();
-  if (/(\d+)\s*years?\s*ago/.test(text)) {
-    return now.getFullYear() - parseInt(RegExp.$1);
-  } else if (/(\d+)\s*months?\s*ago/.test(text)) {
-    const monthsAgo = parseInt(RegExp.$1);
-    const date = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
-    return date.getFullYear();
-  } else if (/(\d{4})/.test(text)) {
-    return parseInt(RegExp.$1);
-  }
-  return null;
-}
+import { getUploadedTime } from "../utils/get-ytv-uploaded-time";
 
 // Filter function for all video cards
 function filterYouTubeVideos(fromYear, toYear) {
@@ -23,7 +9,7 @@ function filterYouTubeVideos(fromYear, toYear) {
       .find(span => /\d/.test(span.textContent));
     if (!dateNode) return;
 
-    const year = getYearFromText(dateNode.textContent.trim());
+    const year = getUploadedTime(dateNode.textContent.trim());
     if (year && (year < fromYear || year > toYear)) {
       card.style.display = 'none';
     } else {
