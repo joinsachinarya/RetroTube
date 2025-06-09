@@ -1,5 +1,5 @@
 function getDateFromYoutubeDisplayTime(displayString) {
-  console.log('displayString101', displayString);
+  // console.log('displayString101', displayString);
   const now = new Date();
 
   if (displayString === 'just now' || displayString.includes('watching') || displayString.includes('live')) return now;
@@ -57,8 +57,10 @@ function filterVideoCard(card, timeFrom, timeTo) {
   // const shortVideoCards = document.querySelectorAll('.shortsLockupViewModelHost');
 
   const dateNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('ago'));
+
   const liveNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('watching'));
   if (liveNode) { card.parentNode.style.display = 'none'; card.dataset.filtered = "1"; }
+
   if (!dateNode) return;
   const uploadedTime = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
   if (!uploadedTime) return;
@@ -81,15 +83,23 @@ function filterYouTubeVideos(timeFrom, timeTo) {
 function applyOtherFilters() {
   chrome.storage.local.get(['hidePlaylists', 'liveStream', 'hideShorts'], (data) => {
     // console.log('data', data);
-    if (data.hidePlaylists) {
-      document.querySelectorAll('.playlist-lockup').forEach(card => card.style.display = 'none');
-    }
+    // if (data.hidePlaylists) {
+    //   const videoCards = document.querySelectorAll('#dismissible');
+    //   console.log('videoCards', videoCards);
+    //   videoCards.forEach((card) => {
+    //     const updatedNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('Updated'));
+    //     console.log('updatedNode', updatedNode);
+    //     if (updatedNode) {
+    //       card.style.display = 'none';
+    //     }
+    //   })
+    // }
     if (data.hideShorts) {
       const shortsHeading = document.querySelectorAll('#dismissible > div#rich-shelf-header-container')
       const sortVideos = document.querySelectorAll('#dismissible > div#contents-container')
       const searchedShorts = document.querySelectorAll('ytd-reel-shelf-renderer')
-      console.log('shortsHeading', shortsHeading);
-      console.log('sortVideos', sortVideos);
+      // console.log('shortsHeading', shortsHeading);
+      // console.log('sortVideos', sortVideos);
       shortsHeading.forEach(heading => heading.style.display = 'none');
       sortVideos.forEach(video => video.style.display = 'none');
       searchedShorts.forEach(short => short.style.display = 'none');

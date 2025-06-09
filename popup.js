@@ -55,7 +55,7 @@ function applyFilter() {
             console.error('Error saving settings:', chrome.runtime.lastError);
             return;
         }
-        console.log('Filter applied! Changes will be visible automatically.');
+        // console.log('Filter applied! Changes will be visible automatically.');
     });
 
     // hide popup and refresh the page 
@@ -69,7 +69,7 @@ function toggleHidePlaylists() {
             console.error('Error saving settings:', chrome.runtime.lastError);
             return;
         }
-        console.log('Hide Playlists setting saved:', hidePlaylists.checked);
+        // console.log('Hide Playlists setting saved:', hidePlaylists.checked);
     });
 }
 
@@ -79,7 +79,7 @@ function toggleHideShorts() {
             console.error('Error saving settings:', chrome.runtime.lastError);
             return;
         }
-        console.log('Hide Shorts setting saved:', hideShorts.checked);
+        // console.log('Hide Shorts setting saved:', hideShorts.checked);
     });
 }
 
@@ -100,7 +100,7 @@ function handleClearTimeFrom() {
             console.error('Error saving settings:', chrome.runtime.lastError);
             return;
         }
-        console.log('Time From cleared');
+        // console.log('Time From cleared');
     });
 }
 function handleClearTimeTo() {
@@ -110,7 +110,7 @@ function handleClearTimeTo() {
             console.error('Error saving settings:', chrome.runtime.lastError);
             return;
         }
-        console.log('Time To cleared');
+        // console.log('Time To cleared');
     });
 }
 
