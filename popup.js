@@ -83,6 +83,16 @@ function toggleHideShorts() {
     });
 }
 
+// function toggleHideLivestreams() {
+//     chrome.storage.local.set({ liveStream: liveStream.checked }, () => {
+//         if (chrome.runtime.lastError) {
+//             console.error('Error saving settings:', chrome.runtime.lastError);
+//             return;
+//         }
+//         console.log('Hide Livestreams setting saved:', liveStream.checked);
+//     });
+// }
+
 function handleClearTimeFrom() {
     timeFromInput.value = '';
     chrome.storage.local.set({ timeFrom: '' }, () => {
@@ -112,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyButton.addEventListener('click', applyFilter);
     hidePlaylists.addEventListener('change', toggleHidePlaylists);
     hideShorts.addEventListener('change', toggleHideShorts);
+    // liveStream.addEventListener('change', toggleHideLivestreams);
     clearTimeFrom.addEventListener('click', handleClearTimeFrom);
     clearTimeTo.addEventListener('click', handleClearTimeTo);
 });
