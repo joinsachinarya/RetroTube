@@ -1,15 +1,17 @@
 function getDateFromYoutubeDisplayTime(displayString) {
+  console.log('displayString101', displayString);
   const now = new Date();
 
-  if (displayString === 'just now') return now;
+  if (displayString === 'just now' || displayString.includes('watching')) return now;
 
   const regexps = [
-    { re: /^(\d+)\s*minute[s]?\s*ago$/, unit: 'minute' },
-    { re: /^(\d+)\s*hour[s]?\s*ago$/, unit: 'hour' },
-    { re: /^(\d+)\s*day[s]?\s*ago$/, unit: 'day' },
-    { re: /^(\d+)\s*week[s]?\s*ago$/, unit: 'week' },
-    { re: /^(\d+)\s*month[s]?\s*ago$/, unit: 'month' },
-    { re: /^(\d+)\s*year[s]?\s*ago$/, unit: 'year' },
+    { re: /^.*(\d+)\s*minute[s]?\s*ago$/, unit: 'minute' },
+    { re: /^.*(\d+)\s*hour[s]?\s*ago$/, unit: 'hour' },
+    { re: /^.*(\d+)\s*day[s]?\s*ago$/, unit: 'day' },
+    { re: /^.*(\d+)\s*week[s]?\s*ago$/, unit: 'week' },
+    { re: /^.*(\d+)\s*month[s]?\s*ago$/, unit: 'month' },
+    { re: /^.*(\d+)\s*year[s]?\s*ago$/, unit: 'year' },
+    { re: /^.*(\d+)\s*second[s]?\s*ago$/, unit: 'second' },
   ];
 
   for (const { re, unit } of regexps) {
@@ -19,6 +21,9 @@ function getDateFromYoutubeDisplayTime(displayString) {
       const date = new Date(now);
 
       switch (unit) {
+        case 'second':
+          date.setSeconds(date.getSeconds() - value);
+          return date;
         case 'minute':
           date.setMinutes(date.getMinutes() - value);
           return date;
@@ -56,11 +61,11 @@ function filterVideoCard(card, timeFrom, timeTo) {
   const uploadedTime = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
   if (!uploadedTime) return;
 
-  console.log('uploadedTime', uploadedTime, timeFrom, timeTo, uploadedTime < timeFrom, uploadedTime > timeTo, card)
+  // console.log('uploadedTime', uploadedTime, timeFrom, timeTo, uploadedTime < timeFrom, uploadedTime > timeTo, card)
   if (uploadedTime < timeFrom || uploadedTime > timeTo) {
-    card.style.display = 'none';
+    card.parentNode.style.display = 'none';
   } else {
-    card.style.display = '';
+    card.parentNode.style.display = '';
   }
 
   card.dataset.filtered = "1";
@@ -70,6 +75,23 @@ function filterYouTubeVideos(timeFrom, timeTo) {
   const videoCards = document.querySelectorAll('#dismissible:not([data-filtered="1"])');
   videoCards.forEach(card => filterVideoCard(card, timeFrom, timeTo));
 }
+
+function applyOtherFilters() {
+  chrome.storage.local.get(['hidePlaylists', 'hideShorts'], (data) => {
+    if (data.hidePlaylists) {
+      document.querySelectorAll('.playlist-lockup').forEach(card => card.style.display = 'none');
+    }
+    if (data.hideShorts) {
+      const shortsHeading = document.querySelectorAll('#dismissible > div#rich-shelf-header-container')
+      const sortVideos = document.querySelectorAll('#dismissible > div#contents-container')
+      console.log('shortsHeading', shortsHeading);
+      console.log('sortVideos', sortVideos);
+      shortsHeading.forEach(heading => heading.style.display = 'none');
+      sortVideos.forEach(video => video.style.display = 'none');
+    }
+  });
+}
+
 
 function loadSettingsAndFilter(targetNodes) {
   chrome.storage.local.get(['timeFrom', 'timeTo'], (data) => {
@@ -98,6 +120,7 @@ function loadSettingsAndFilter(targetNodes) {
 
 // Initial full filter on load
 loadSettingsAndFilter();
+applyOtherFilters();
 
 // Use observer for only newly added nodes
 const observer = new MutationObserver((mutations) => {
@@ -107,6 +130,7 @@ const observer = new MutationObserver((mutations) => {
   });
   if (addedNodes.length) {
     loadSettingsAndFilter(addedNodes);
+    applyOtherFilters();
   }
 });
 
@@ -118,6 +142,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     // Remove filter marks to allow re-filtering all cards
     document.querySelectorAll('#dismissible[data-filtered="1"]').forEach(card => card.removeAttribute('data-filtered'));
     loadSettingsAndFilter();
+    applyOtherFilters();
   }
 });
 

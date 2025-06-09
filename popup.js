@@ -1,14 +1,15 @@
 // Constants for date values
 const YOUTUBE_LAUNCH_DATE = '2005-04-24T03:31';
-const STORAGE_KEYS = ['timeFrom', 'timeTo', 'hidePlaylists', 'hideLivestreams', 'hideShorts'];
+const STORAGE_KEYS = ['timeFrom', 'timeTo', 'hidePlaylists', 'hideShorts'];
 
 // Get DOM elements once
 const timeFromInput = document.getElementById('timeFrom');
 const timeToInput = document.getElementById('timeTo');
 const applyButton = document.getElementById('applyButton');
 const hidePlaylists = document.getElementById('hidePlaylists');
-const hideLivestreams = document.getElementById('hideLivestreams');
 const hideShorts = document.getElementById('hideShorts');
+const clearTimeFrom = document.getElementById('clearTimeFrom');
+const clearTimeTo = document.getElementById('clearTimeTo');
 
 // Initialize inputs
 function initializeInputs() {
@@ -29,7 +30,6 @@ function loadSettings() {
         timeFromInput.value = data.timeFrom || '';
         timeToInput.value = data.timeTo || '';
         hidePlaylists.checked = !!data.hidePlaylists;
-        hideLivestreams.checked = !!data.hideLivestreams;
         hideShorts.checked = !!data.hideShorts;
     });
 }
@@ -38,18 +38,17 @@ function applyFilter() {
     const timeFrom = timeFromInput.value;
     const timeTo = timeToInput.value;
     if (!timeFrom || !timeTo) {
-        console.log('Please select both start and end times');
+        alert('Please select both start and end times');
         return;
     }
     if (new Date(timeFrom) > new Date(timeTo)) {
-        console.log('Start time cannot be after end time');
+        alert('Start time cannot be after end time');
         return;
     }
     chrome.storage.local.set({
         timeFrom,
         timeTo,
         hidePlaylists: hidePlaylists.checked,
-        hideLivestreams: hideLivestreams.checked,
         hideShorts: hideShorts.checked
     }, () => {
         if (chrome.runtime.lastError) {
@@ -58,6 +57,10 @@ function applyFilter() {
         }
         console.log('Filter applied! Changes will be visible automatically.');
     });
+
+    // hide popup and refresh the page 
+    document.getElementById('popup').style.display = 'none';
+    location.reload();
 }
 
 function toggleHidePlaylists() {
@@ -69,15 +72,7 @@ function toggleHidePlaylists() {
         console.log('Hide Playlists setting saved:', hidePlaylists.checked);
     });
 }
-function toggleHideLivestreams() {
-    chrome.storage.local.set({ hideLivestreams: hideLivestreams.checked }, () => {
-        if (chrome.runtime.lastError) {
-            console.error('Error saving settings:', chrome.runtime.lastError);
-            return;
-        }
-        console.log('Hide Livestreams setting saved:', hideLivestreams.checked);
-    });
-}
+
 function toggleHideShorts() {
     chrome.storage.local.set({ hideShorts: hideShorts.checked }, () => {
         if (chrome.runtime.lastError) {
@@ -88,11 +83,35 @@ function toggleHideShorts() {
     });
 }
 
+function handleClearTimeFrom() {
+    timeFromInput.value = '';
+    chrome.storage.local.set({ timeFrom: '' }, () => {
+        if (chrome.runtime.lastError) {
+            console.error('Error saving settings:', chrome.runtime.lastError);
+            return;
+        }
+        console.log('Time From cleared');
+    });
+}
+function handleClearTimeTo() {
+    timeToInput.value = '';
+    chrome.storage.local.set({ timeTo: '' }, () => {
+        if (chrome.runtime.lastError) {
+            console.error('Error saving settings:', chrome.runtime.lastError);
+            return;
+        }
+        console.log('Time To cleared');
+    });
+}
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeInputs();
     loadSettings();
     applyButton.addEventListener('click', applyFilter);
     hidePlaylists.addEventListener('change', toggleHidePlaylists);
-    hideLivestreams.addEventListener('change', toggleHideLivestreams);
     hideShorts.addEventListener('change', toggleHideShorts);
+    clearTimeFrom.addEventListener('click', handleClearTimeFrom);
+    clearTimeTo.addEventListener('click', handleClearTimeTo);
 });
