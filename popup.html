@@ -22,14 +22,36 @@
 
     <div class="filter-container">
       <h3>Other filters</h3>
-      <label>Hide Shorts <input type="checkbox" name="hideShorts" id="hideShorts" onchange="toggleHideShorts"></label>
-      <label>Hide Mixes <input type="checkbox" name="hidePlaylists" id="hidePlaylists"
-          onchange="toggleHidePlaylists"></label>
-      <label>Hide Livestreams <input type="checkbox" name="liveStream" id="liveStream"
-          onchange="toggleHideLivestreams"></label>
+      <label>
+        Hide Shorts
+        <span class="switch">
+          <input type="checkbox" name="hideShorts" id="hideShorts">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <label>
+        Hide Mixes
+        <span class="switch">
+          <input type="checkbox" name="hidePlaylists" id="hidePlaylists">
+          <span class="slider"></span>
+        </span>
+      </label>
+      <label>
+        Hide Livestreams
+        <span class="switch">
+          <input type="checkbox" name="liveStream" id="liveStream">
+          <span class="slider"></span>
+        </span>
+      </label>
     </div>
   </div>
   <button id="applyButton" class="apply-button">Apply Filter</button>
+  <dialog id="alertDialog" class="alert-dialog">
+    <div class="alert-content">
+      <span id="alertMessage"></span>
+      <button id="closeAlert" class="alert-close">OK</button>
+    </div>
+  </dialog>
   <script type="module" src="popup.js"></script>
 </body>
 

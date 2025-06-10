@@ -125,4 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // liveStream.addEventListener('change', toggleHideLivestreams);
     clearTimeFrom.addEventListener('click', handleClearTimeFrom);
     clearTimeTo.addEventListener('click', handleClearTimeTo);
+    // Add transition class for smooth popup appearance
+    setTimeout(() => {
+        document.body.classList.add('popup-visible');
+    }, 10);
 });
