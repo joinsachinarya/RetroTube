@@ -8,44 +8,59 @@
 <body>
   <div class="container">
     <div class="filter-container">
-      <h3>Select time range</h3>
+      <h3>SHOW ME VIDEOS UPLOADED</h3>
       <label>
-        From <input type="datetime-local" name="timeFrom" id="timeFrom" value="" min="" max="">
-        <button id="clearTimeFrom" class="clear-button">Clear</button>
+        <p style="min-width: 36px;">Before</p>
+        <select id="beforeMonthSelect" name="beforeMonthSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <select id="beforeYearSelect" name="beforeYearSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <button id="clearBeforeDropdown" class="clear-button">Reset</button>
       </label>
 
+      <p style=" text-align: center;">AND</p>
+
       <label>
-        To <input type="datetime-local" name="timeTo" id="timeTo" value="" min="" max="">
-        <button id="clearTimeTo" class="clear-button">Clear</button>
+        <p style="min-width: 36px;">After</p>
+        <select id="afterMonthSelect" name="afterMonthSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <select id="afterYearSelect" name="afterYearSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <button id="clearAfterDropdown" class="clear-button">Reset</button>
       </label>
     </div>
 
     <div class="filter-container">
-      <h3>Other filters</h3>
+      <h3>I DON'T WANT TO SEE</h3>
       <label>
-        Hide Shorts
+        Shorts
         <span class="switch">
           <input type="checkbox" name="hideShorts" id="hideShorts">
           <span class="slider"></span>
         </span>
       </label>
       <label>
-        Hide Mixes
+        Playlists
         <span class="switch">
           <input type="checkbox" name="hidePlaylists" id="hidePlaylists">
           <span class="slider"></span>
         </span>
       </label>
-      <label>
-        Hide Livestreams
+      <!-- <label>
+        Live Streams
         <span class="switch">
-          <input type="checkbox" name="liveStream" id="liveStream">
+          <input type="checkbox" name="hideLiveStream" id="hideLiveStream">
           <span class="slider"></span>
         </span>
-      </label>
+      </label> -->
     </div>
   </div>
   <button id="applyButton" class="apply-button">Apply Filter</button>
+
   <dialog id="alertDialog" class="alert-dialog">
     <div class="alert-content">
       <span id="alertMessage"></span>

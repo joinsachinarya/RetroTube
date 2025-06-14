@@ -3,7 +3,6 @@
     "name": "YouTube Time Travel",
     "description": "Time travel on YouTube",
     "version": "0.0.1",
-    "type": "module",
     "icons": {
         "128": "assets/logo.png"
     },
