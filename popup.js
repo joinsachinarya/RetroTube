@@ -1,24 +1,18 @@
 import { formatInputValueAndGetDate } from './constant/timeDateMapping.js';
-// Constants for date values
-const STORAGE_KEYS = ['before', 'after', 'hidePlaylists', 'hideShorts', 'hideLiveStream'];
-
-// Get DOM elements
+const STORAGE_KEYS = ['before', 'after', 'hidePlaylists', 'hideShorts'];
+console.log('popup.js loaded');
+// dom elements
 const beforeMonthSelect = document.getElementById('beforeMonthSelect');
 const beforeYearSelect = document.getElementById('beforeYearSelect');
 const afterMonthSelect = document.getElementById('afterMonthSelect');
 const afterYearSelect = document.getElementById('afterYearSelect');
 const applyButton = document.getElementById('applyButton');
-const hidePlaylists = document.getElementById('hidePlaylists');
+// const hidePlaylists = document.getElementById('hidePlaylists');
 const hideShorts = document.getElementById('hideShorts');
 // const hideLiveStream = document.getElementById('hideLiveStream');
 const clearBeforeDropdown = document.getElementById('clearBeforeDropdown');
 const clearAfterDropdown = document.getElementById('clearAfterDropdown');
 
-// Helper: Month name to number (0-based)
-const monthMap = {
-    january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
-    july: 6, august: 7, september: 8, october: 9, november: 10, december: 11
-};
 
 function showAlert(message) {
     const dialog = document.getElementById('alertDialog');
@@ -31,90 +25,78 @@ function showAlert(message) {
 }
 
 
-function setValueInLocalStorage(key, value) {
-    chrome.storage.local.set({
-        [key]: value
-    }, () => {
-        if (chrome.runtime.lastError) {
-            showAlert('Something went wrong! Please try again.');
-        }
-    });
-    applyButton.disabled = false;
-}
-
-
-function saveSettings(before, after, hideShorts, hidePlaylists) {
+function saveSettings(before, after, hideShorts) {
     chrome.storage.local.set({
         before,
         after,
         hideShorts,
-        hidePlaylists,
     }, () => {
         if (chrome.runtime.lastError) {
             showAlert('Something went wrong! Please try again.');
+        } else {
+            // window.close();
+            // chrome.tabs.reload();
         }
     });
 }
 
 function applyFilter() {
-    const before = `${beforeMonthSelect.value} ${beforeYearSelect.value}`;
-    const after = `${afterMonthSelect.value} ${afterYearSelect.value}`;
+    const before = beforeMonthSelect.value && beforeYearSelect.value ? `${beforeMonthSelect.value} ${beforeYearSelect.value}` : '';
+    const after = afterMonthSelect.value && afterYearSelect.value ? `${afterMonthSelect.value} ${afterYearSelect.value}` : '';
 
-    if (new Date(after) > new Date(before)) {
+    if (before && after && new Date(after) > new Date(before)) {
         showAlert("'After' should be lesser than 'Before'");
         return;
     }
-    saveSettings(before, after, hideShorts.checked, hidePlaylists.checked);
+    saveSettings(before, after, hideShorts.checked);
 }
 
 function loadInitialFilters() {
     chrome.storage.local.get(STORAGE_KEYS, (data) => {
-        console.log("data", data);
         if (chrome.runtime.lastError) {
             showAlert('Something went wrong! Please try again.');
             return;
         }
-        setValueInLocalStorage('before', data?.before || '');
-        setValueInLocalStorage('after', data?.after || '');
-
-        setValueInLocalStorage('hidePlaylists', data?.hidePlaylists || false);
-        setValueInLocalStorage('hideShorts', data?.hideShorts || false);
-        // setValueInLocalStorage('hideLiveStream', data?.hideLiveStream || false);
-
+        console.log('loadInitialFilters', data);
+        // Set dropdowns for before
+        if (data?.before) {
+            const [month, year] = data.before.split(' ');
+            beforeMonthSelect.value = month || '';
+            beforeYearSelect.value = year || '';
+        } else {
+            beforeMonthSelect.value = '';
+            beforeYearSelect.value = '';
+        }
+        // Set dropdowns for after
+        if (data?.after) {
+            const [month, year] = data.after.split(' ');
+            afterMonthSelect.value = month || '';
+            afterYearSelect.value = year || '';
+        } else {
+            afterMonthSelect.value = '';
+            afterYearSelect.value = '';
+        }
+        // hidePlaylists.checked = !!data?.hidePlaylists;
+        hideShorts.checked = !!data?.hideShorts;
+        clearBeforeDropdown.disabled = !(data?.before && data.before.trim());
+        clearAfterDropdown.disabled = !(data?.after && data.after.trim());
         applyButton.disabled = true;
-        if (!data?.before.trim()) clearBeforeDropdown.disabled = true;
-        if (!data?.after.trim()) clearAfterDropdown.disabled = true;
     });
 }
-
-
 
 function handleClearBeforeDropdown() {
     beforeMonthSelect.value = '';
     beforeYearSelect.value = '';
-    setValueInLocalStorage('before', '');
+    applyButton.disabled = false;
 }
 
 function handleClearAfterDropdown() {
     afterMonthSelect.value = '';
     afterYearSelect.value = '';
-    setValueInLocalStorage('after', '');
+    applyButton.disabled = false;
 }
 
-function toggleHidePlaylists() {
-    setValueInLocalStorage('hidePlaylists', !hidePlaylists.checked);
-}
-function toggleHideShorts() {
-    setValueInLocalStorage('hideShorts', !hideShorts.checked);
-}
-// function toggleHideLiveStream() {
-//     setValueInLocalStorage('hideLiveStream', !hideLiveStream.checked);
-// }
-
-
-
-
-// populate dropdowns helper functions
+// populate dropdowns
 const currentYear = new Date().getFullYear();
 const years = [];
 const months = [
@@ -150,9 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBeforeDropdown.addEventListener('click', handleClearBeforeDropdown);
     clearAfterDropdown.addEventListener('click', handleClearAfterDropdown);
 
-    hidePlaylists.addEventListener('change', toggleHidePlaylists);
-    hideShorts.addEventListener('change', toggleHideShorts);
-    // hideLiveStream.addEventListener('change', toggleHideLiveStream());
+    // save on apply
     [beforeMonthSelect, beforeYearSelect, afterMonthSelect, afterYearSelect].forEach((select) => {
         select.addEventListener('change', () => {
             const isBeforeMonthSelected = !!beforeMonthSelect.value.trim();
@@ -174,6 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     })
+
+    // enable apply on toggling 
+    hideShorts.addEventListener('change', () => {
+        applyButton.disabled = false;
+    });
+    // hidePlaylists.addEventListener('change', () => {
+    //     applyButton.disabled = false;
+    // });
 
     // show popup
     setTimeout(() => {
