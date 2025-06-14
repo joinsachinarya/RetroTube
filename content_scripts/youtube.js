@@ -1,4 +1,72 @@
-const { getDateFromYoutubeDisplayTime } = require('../utils/yt-date-format');
+const monthMap = {
+  0: 'january', 1: 'february', 2: 'march', 3: 'april', 4: 'may', 5: 'june',
+  6: 'july', 7: 'august', 8: 'september', 9: 'october', 10: 'november', 11: 'december'
+};
+
+function getDateFromYoutubeDisplayTime(displayString) {
+  const now = new Date();
+
+  if (
+    displayString === 'just now' ||
+    displayString.includes('watching') ||
+    displayString.includes('live')
+  ) {
+    return `${monthMap[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  const regexps = [
+    { re: /^(\d+)\s*second[s]?\s*ago$/, unit: 'second' },
+    { re: /^(\d+)\s*minute[s]?\s*ago$/, unit: 'minute' },
+    { re: /^(\d+)\s*hour[s]?\s*ago$/, unit: 'hour' },
+    { re: /^(\d+)\s*day[s]?\s*ago$/, unit: 'day' },
+    { re: /^(\d+)\s*week[s]?\s*ago$/, unit: 'week' },
+    { re: /^(\d+)\s*month[s]?\s*ago$/, unit: 'month' },
+    { re: /^(\d+)\s*year[s]?\s*ago$/, unit: 'year' }
+  ];
+
+  for (const { re, unit } of regexps) {
+    const match = displayString.match(re);
+    if (match) {
+      const value = parseInt(match[1], 10);
+      const date = new Date(now);
+
+      switch (unit) {
+        case 'second':
+          date.setSeconds(date.getSeconds() - value);
+          break;
+        case 'minute':
+          date.setMinutes(date.getMinutes() - value);
+          break;
+        case 'hour':
+          date.setHours(date.getHours() - value);
+          break;
+        case 'day':
+          date.setDate(date.getDate() - value);
+          break;
+        case 'week':
+          date.setDate(date.getDate() - value * 7);
+          break;
+        case 'month':
+          date.setMonth(date.getMonth() - value);
+          break;
+        case 'year':
+          date.setFullYear(date.getFullYear() - value);
+          break;
+      }
+
+      return `${monthMap[date.getMonth()]} ${date.getFullYear()}`;
+    }
+  }
+
+  const tryDate = new Date(displayString);
+  if (!isNaN(tryDate.getTime())) {
+    return `${monthMap[tryDate.getMonth()]} ${tryDate.getFullYear()}`;
+  }
+
+  console.error("Unrecognized display string: " + displayString);
+  return `${monthMap[now.getMonth()]} ${now.getFullYear()}`;;
+}
+
 console.log('youtube.js loaded');
 
 function filterVideoCard(card, before, after, filterMode) {
@@ -6,8 +74,11 @@ function filterVideoCard(card, before, after, filterMode) {
   const liveNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('watching'));
 
   if (liveNode) {
-    card.parentNode.style.display = 'none';
-    return;
+    const richItemRenderer = card.closest('ytd-rich-item-renderer');
+    if (richItemRenderer) {
+      richItemRenderer.style.display = 'none';
+      return;
+    }
   }
   if (!dateNode) return;
   const uploadedTimeStr = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
@@ -22,7 +93,10 @@ function filterVideoCard(card, before, after, filterMode) {
   } else if (filterMode === 'range') {
     show = uploadedTime >= after && uploadedTime <= before;
   }
-  card.parentNode.style.display = show ? '' : 'none';
+  const richItemRenderer = card.closest('ytd-rich-item-renderer');
+  if (richItemRenderer) {
+    richItemRenderer.style.display = show ? '' : 'none';
+  }
 }
 
 function filterYouTubeVideos(before, after) {
@@ -43,10 +117,10 @@ function filterYouTubeVideos(before, after) {
 }
 
 function applyOtherFilters() {
+  const videoCards = document.querySelectorAll('#dismissible');
   chrome.storage.local.get(['hideShorts'], (data) => {
 
     // reset display
-    const videoCards = document.querySelectorAll('#dismissible');
     videoCards.forEach(card => card.style.display = '');
 
     // if (data.hidePlaylists) {
@@ -118,16 +192,23 @@ function loadSettingsAndFilter(targetNodes) {
 loadSettingsAndFilter();
 applyOtherFilters();
 
-// observer for newly added nodes
+// debounce utility
+function debounce(fn, delay) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// observer for newly added nodes (debounced)
+const debouncedFilter = debounce(() => {
+  loadSettingsAndFilter();
+  applyOtherFilters();
+}, 10);
+
 const observer = new MutationObserver((mutations) => {
-  const addedNodes = [];
-  mutations.forEach(mutation => {
-    mutation.addedNodes && mutation.addedNodes.forEach(node => addedNodes.push(node));
-  });
-  if (addedNodes.length) {
-    loadSettingsAndFilter(addedNodes);
-    applyOtherFilters();
-  }
+  debouncedFilter();
 });
 
 observer.observe(document.body, { childList: true, subtree: true });

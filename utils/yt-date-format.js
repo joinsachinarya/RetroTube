@@ -1,9 +1,9 @@
-export const monthMap = {
+const monthMap = {
     0: 'january', 1: 'february', 2: 'march', 3: 'april', 4: 'may', 5: 'june',
     6: 'july', 7: 'august', 8: 'september', 9: 'october', 10: 'november', 11: 'december'
 };
 
-export function getDateFromYoutubeDisplayTime(displayString) {
+function getDateFromYoutubeDisplayTime(displayString) {
     const now = new Date();
 
     if (
@@ -67,3 +67,6 @@ export function getDateFromYoutubeDisplayTime(displayString) {
     return `${monthMap[now.getMonth()]} ${now.getFullYear()}`;;
 }
 
+export {
+    getDateFromYoutubeDisplayTime
+}

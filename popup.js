@@ -34,8 +34,8 @@ function saveSettings(before, after, hideShorts) {
         if (chrome.runtime.lastError) {
             showAlert('Something went wrong! Please try again.');
         } else {
-            // window.close();
-            // chrome.tabs.reload();
+            window.close();
+            chrome.tabs.reload();
         }
     });
 }
