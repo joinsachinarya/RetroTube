@@ -9,8 +9,22 @@
   <div class="container">
     <div class="filter-container">
       <h3>SHOW ME VIDEOS UPLOADED</h3>
+
       <label>
-        <p style="min-width: 36px;">Before</p>
+        <p style="min-width: 36px;">From</p>
+        <select id="afterMonthSelect" name="afterMonthSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <select id="afterYearSelect" name="afterYearSelect" class="select-container">
+          <option value="">Select...</option>
+        </select>
+        <button id="clearAfterDropdown" class="clear-button">Reset</button>
+      </label>
+
+      <p style=" text-align: center;">AND</p>
+
+      <label>
+        <p style="min-width: 36px;">To</p>
         <select id="beforeMonthSelect" name="beforeMonthSelect" class="select-container">
           <option value="">Select...</option>
         </select>
@@ -20,18 +34,6 @@
         <button id="clearBeforeDropdown" class="clear-button">Reset</button>
       </label>
 
-      <p style=" text-align: center;">AND</p>
-
-      <label>
-        <p style="min-width: 36px;">After</p>
-        <select id="afterMonthSelect" name="afterMonthSelect" class="select-container">
-          <option value="">Select...</option>
-        </select>
-        <select id="afterYearSelect" name="afterYearSelect" class="select-container">
-          <option value="">Select...</option>
-        </select>
-        <button id="clearAfterDropdown" class="clear-button">Reset</button>
-      </label>
     </div>
 
     <div class="filter-container">
