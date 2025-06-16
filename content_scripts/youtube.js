@@ -79,7 +79,14 @@ function filterVideoCard(card, before, after, filterMode) {
       richItemRenderer.style.display = 'none';
       return;
     }
+    const compactRenderer = card.closest('ytd-compact-video-renderer');
+    if (compactRenderer) {
+      compactRenderer.style.display = 'none';
+      return;
+    }
   }
+
+
   if (!dateNode) return;
   const uploadedTimeStr = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
   if (!uploadedTimeStr) return;
@@ -96,6 +103,10 @@ function filterVideoCard(card, before, after, filterMode) {
   const richItemRenderer = card.closest('ytd-rich-item-renderer');
   if (richItemRenderer) {
     richItemRenderer.style.display = show ? '' : 'none';
+  }
+  const compactRenderer = card.closest('ytd-compact-video-renderer');
+  if (compactRenderer) {
+    compactRenderer.style.display = show ? '' : 'none';
   }
 }
 
@@ -135,12 +146,16 @@ function applyOtherFilters() {
       const shortsHeading = document.querySelectorAll('#dismissible > div#rich-shelf-header-container');
       const sortVideos = document.querySelectorAll('#dismissible > div#contents-container');
       const searchedShorts = document.querySelectorAll('ytd-reel-shelf-renderer');
+      const shortsNavigationTab = document.querySelector('#items > ytd-mini-guide-entry-renderer:nth-child(2)');
 
       console.log('shortsHeading', shortsHeading, sortVideos, searchedShorts);
       shortsHeading.forEach(heading => heading.style.display = 'none');
       sortVideos.forEach(video => video.style.display = 'none');
       searchedShorts.forEach(short => short.style.display = 'none');
-      // Shorts as video cards (sometimes appear as cards)
+      if (shortsNavigationTab && shortsNavigationTab.getAttribute('aria-hidden') !== 'true') {
+        shortsNavigationTab.style.display = 'none';             
+        shortsNavigationTab.setAttribute('aria-hidden', 'true');
+      }
       videoCards.forEach(card => {
         if (card.innerHTML.toLowerCase().includes('shorts')) {
           card.style.display = 'none';

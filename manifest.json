@@ -4,11 +4,11 @@
     "description": "Time travel on YouTube",
     "version": "0.0.1",
     "icons": {
-        "128": "assets/logo.png"
+        "128": "assets/logo.jpg"
     },
     "action": {
         "default_popup": "popup.html",
-        "default_icon": "assets/logo.png"
+        "default_icon": "assets/logo.jpg"
     },
     "permissions": [
         "storage"
