@@ -1,5 +1,5 @@
 import { formatInputValueAndGetDate } from './constant/timeDateMapping.js';
-const STORAGE_KEYS = ['before', 'after', 'hidePlaylists', 'hideShorts'];
+const STORAGE_KEYS = ['before', 'after', 'hideShorts', 'hidePlaylists'];
 console.log('popup.js loaded');
 // dom elements
 const beforeMonthSelect = document.getElementById('beforeMonthSelect');
@@ -7,7 +7,7 @@ const beforeYearSelect = document.getElementById('beforeYearSelect');
 const afterMonthSelect = document.getElementById('afterMonthSelect');
 const afterYearSelect = document.getElementById('afterYearSelect');
 const applyButton = document.getElementById('applyButton');
-// const hidePlaylists = document.getElementById('hidePlaylists');
+const hidePlaylists = document.getElementById('hidePlaylists');
 const hideShorts = document.getElementById('hideShorts');
 // const hideLiveStream = document.getElementById('hideLiveStream');
 const clearBeforeDropdown = document.getElementById('clearBeforeDropdown');
@@ -25,12 +25,13 @@ function showAlert(message) {
 }
 
 
-function saveSettings(before, after, hideShorts) {
+function saveSettings(before, after, hideShorts, hidePlaylists) {
     chrome.storage.local.set({
         before,
         after,
         hideShorts,
-    }, () => {
+        hidePlaylists,
+        }, () => {
         if (chrome.runtime.lastError) {
             showAlert('Something went wrong! Please try again.');
         } else {
@@ -48,7 +49,7 @@ function applyFilter() {
         showAlert("'After' should be lesser than 'Before'");
         return;
     }
-    saveSettings(before, after, hideShorts.checked);
+    saveSettings(before, after, hideShorts.checked, hidePlaylists.checked);
 }
 
 function loadInitialFilters() {
@@ -76,7 +77,7 @@ function loadInitialFilters() {
             afterMonthSelect.value = '';
             afterYearSelect.value = '';
         }
-        // hidePlaylists.checked = !!data?.hidePlaylists;
+        hidePlaylists.checked = !!data?.hidePlaylists;
         hideShorts.checked = !!data?.hideShorts;
         clearBeforeDropdown.disabled = !(data?.before && data.before.trim());
         clearAfterDropdown.disabled = !(data?.after && data.after.trim());
@@ -159,9 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
     hideShorts.addEventListener('change', () => {
         applyButton.disabled = false;
     });
-    // hidePlaylists.addEventListener('change', () => {
-    //     applyButton.disabled = false;
-    // });
+    hidePlaylists.addEventListener('change', () => {
+        applyButton.disabled = false;
+    });
 
     // show popup
     setTimeout(() => {

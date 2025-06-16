@@ -129,19 +129,23 @@ function filterYouTubeVideos(before, after) {
 
 function applyOtherFilters() {
   const videoCards = document.querySelectorAll('#dismissible');
-  chrome.storage.local.get(['hideShorts'], (data) => {
+  const collectionThumbnailViewModels = document.querySelectorAll('.yt-collection-thumbnail-view-model');
+  chrome.storage.local.get(['hideShorts', 'hidePlaylists'], (data) => {
 
     // reset display
     videoCards.forEach(card => card.style.display = '');
 
-    // if (data.hidePlaylists) {
-    //   videoCards.forEach((card) => {
-    //     const updatedNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('Updated'));
-    //     if (updatedNode) {
-    //       card.style.display = 'none';
-    //     }
-    //   });
-    // }
+    if (data.hidePlaylists) {
+      collectionThumbnailViewModels.forEach((card) => {
+        if (card) {
+          const richItemRenderer = card.closest('ytd-rich-item-renderer');
+          if (richItemRenderer && richItemRenderer.getAttribute('aria-hidden') !== 'true') {
+            richItemRenderer.style.display = 'none';
+            richItemRenderer.setAttribute('aria-hidden', 'true');
+          }
+        }
+      });
+    }
     if (data.hideShorts) {
       const shortsHeading = document.querySelectorAll('#dismissible > div#rich-shelf-header-container');
       const sortVideos = document.querySelectorAll('#dismissible > div#contents-container');
@@ -153,7 +157,7 @@ function applyOtherFilters() {
       sortVideos.forEach(video => video.style.display = 'none');
       searchedShorts.forEach(short => short.style.display = 'none');
       if (shortsNavigationTab && shortsNavigationTab.getAttribute('aria-hidden') !== 'true') {
-        shortsNavigationTab.style.display = 'none';             
+        shortsNavigationTab.style.display = 'none';
         shortsNavigationTab.setAttribute('aria-hidden', 'true');
       }
       videoCards.forEach(card => {
@@ -166,7 +170,7 @@ function applyOtherFilters() {
 }
 
 function loadSettingsAndFilter(targetNodes) {
-  chrome.storage.local.get(['before', 'after'], (data) => {
+  chrome.storage.local.get(['before', 'after', 'hideShorts', 'hidePlaylists'], (data) => {
     const before = data.before && data.before.trim() ? data.before : '';
     const after = data.after && data.after.trim() ? data.after : '';
     if (targetNodes && targetNodes.length) {
