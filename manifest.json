@@ -4,11 +4,11 @@
     "description": "Vibe Back to OG YouTube",
     "version": "0.0.2",
     "icons": {
-        "128": "assets/logo.jpg"
+        "128": "assets/logo.png"
     },
     "action": {
         "default_popup": "popup.html",
-        "default_icon": "assets/logo.jpg"
+        "default_icon": "assets/logo.png"
     },
     "permissions": [
         "storage"
