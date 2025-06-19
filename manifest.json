@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "YouTube Time Travel",
-    "description": "Time travel on YouTube",
-    "version": "0.0.1",
+    "name": "RetroTube",
+    "description": "Vibe Back to OG YouTube",
+    "version": "0.0.2",
     "icons": {
         "128": "assets/logo.jpg"
     },
