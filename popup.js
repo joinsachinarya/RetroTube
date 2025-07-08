@@ -1,6 +1,5 @@
 import { formatInputValueAndGetDate } from './constant/timeDateMapping.js';
 const STORAGE_KEYS = ['before', 'after', 'hideShorts', 'hidePlaylists'];
-console.log('popup.js loaded');
 // dom elements
 const beforeMonthSelect = document.getElementById('beforeMonthSelect');
 const beforeYearSelect = document.getElementById('beforeYearSelect');
@@ -45,6 +44,31 @@ function applyFilter() {
     const before = beforeMonthSelect.value && beforeYearSelect.value ? `${beforeMonthSelect.value} ${beforeYearSelect.value}` : '';
     const after = afterMonthSelect.value && afterYearSelect.value ? `${afterMonthSelect.value} ${afterYearSelect.value}` : '';
 
+    // Get current month and year
+    const now = new Date();
+    const currentMonth = now.getMonth(); 
+    const currentYear = now.getFullYear();
+
+    // Helper to check if a date is in the future
+    function isFuture(monthStr, yearStr) {
+        if (!monthStr || !yearStr) return false;
+        const monthIdx = months.findIndex(m => m.toLowerCase() === monthStr.toLowerCase());
+        const yearNum = parseInt(yearStr, 10);
+        if (yearNum > currentYear) return true;
+        if (yearNum === currentYear && monthIdx > currentMonth) return true;
+        return false;
+    }
+
+    // Check for future dates
+    if (isFuture(beforeMonthSelect.value, beforeYearSelect.value)) {
+        showAlert("We don't support time travel to the future yet:)");
+        return;
+    }
+    if (isFuture(afterMonthSelect.value, afterYearSelect.value)) {
+        showAlert("We don't support time travel to the future yet:)");
+        return;
+    }
+
     if (before && after && new Date(after) > new Date(before)) {
         showAlert("'After' should be lesser than 'Before'");
         return;
@@ -58,7 +82,6 @@ function loadInitialFilters() {
             showAlert('Something went wrong! Please try again.');
             return;
         }
-        console.log('loadInitialFilters', data);
         // Set dropdowns for before
         if (data?.before) {
             const [month, year] = data.before.split(' ');

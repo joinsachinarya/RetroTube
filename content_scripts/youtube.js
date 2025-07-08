@@ -67,25 +67,25 @@ function getDateFromYoutubeDisplayTime(displayString) {
   return `${monthMap[now.getMonth()]} ${now.getFullYear()}`;;
 }
 
-console.log('youtube.js loaded');
 
 function filterVideoCard(card, before, after, filterMode) {
-  const dateNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('ago'));
-  const liveNode = Array.from(card.querySelectorAll('#metadata-line span')).find(span => span.textContent.includes('watching'));
+  // Cache metadata-line spans
+  const spans = card._metadataSpans || (card._metadataSpans = Array.from(card.querySelectorAll('#metadata-line span')));
+  const dateNode = spans.find(span => span.textContent.includes('ago'));
+  const liveNode = spans.find(span => span.textContent.includes('watching'));
 
   if (liveNode) {
     const richItemRenderer = card.closest('ytd-rich-item-renderer');
-    if (richItemRenderer) {
+    if (richItemRenderer && richItemRenderer.style.display !== 'none') {
       richItemRenderer.style.display = 'none';
       return;
     }
     const compactRenderer = card.closest('ytd-compact-video-renderer');
-    if (compactRenderer) {
+    if (compactRenderer && compactRenderer.style.display !== 'none') {
       compactRenderer.style.display = 'none';
       return;
     }
   }
-
 
   if (!dateNode) return;
   const uploadedTimeStr = getDateFromYoutubeDisplayTime(dateNode.textContent.trim());
@@ -101,11 +101,11 @@ function filterVideoCard(card, before, after, filterMode) {
     show = uploadedTime >= after && uploadedTime <= before;
   }
   const richItemRenderer = card.closest('ytd-rich-item-renderer');
-  if (richItemRenderer) {
+  if (richItemRenderer && richItemRenderer.style.display !== (show ? '' : 'none')) {
     richItemRenderer.style.display = show ? '' : 'none';
   }
   const compactRenderer = card.closest('ytd-compact-video-renderer');
-  if (compactRenderer) {
+  if (compactRenderer && compactRenderer.style.display !== (show ? '' : 'none')) {
     compactRenderer.style.display = show ? '' : 'none';
   }
 }
@@ -118,29 +118,34 @@ function filterYouTubeVideos(before, after) {
   if (beforeDate && afterDate) filterMode = 'range';
   else if (beforeDate) filterMode = 'before';
   else if (afterDate) filterMode = 'after';
-  videoCards.forEach(card => {
-    if (filterMode === 'all') {
-      card.parentNode.style.display = '';
-    } else {
+  if (filterMode === 'all') {
+    videoCards.forEach(card => {
+      if (card.parentNode && card.parentNode.style.display !== '') {
+        card.parentNode.style.display = '';
+      }
+    });
+  } else {
+    videoCards.forEach(card => {
       filterVideoCard(card, beforeDate, afterDate, filterMode);
-    }
-  });
+    });
+  }
 }
 
 function applyOtherFilters() {
   const videoCards = document.querySelectorAll('#dismissible');
   const collectionThumbnailViewModels = document.querySelectorAll('.yt-collection-thumbnail-view-model');
   chrome.storage.local.get(['hideShorts', 'hidePlaylists'], (data) => {
-
     // reset display
-    videoCards.forEach(card => card.style.display = '');
+    videoCards.forEach(card => {
+      if (card.style.display !== '') card.style.display = '';
+    });
 
     if (data.hidePlaylists) {
       collectionThumbnailViewModels.forEach((card) => {
         if (card) {
           const richItemRenderer = card.closest('ytd-rich-item-renderer');
           if (richItemRenderer && richItemRenderer.getAttribute('aria-hidden') !== 'true') {
-            richItemRenderer.style.display = 'none';
+            if (richItemRenderer.style.display !== 'none') richItemRenderer.style.display = 'none';
             richItemRenderer.setAttribute('aria-hidden', 'true');
           }
         }
@@ -152,17 +157,16 @@ function applyOtherFilters() {
       const searchedShorts = document.querySelectorAll('ytd-reel-shelf-renderer');
       const shortsNavigationTab = document.querySelector('#items > ytd-mini-guide-entry-renderer:nth-child(2)');
 
-      console.log('shortsHeading', shortsHeading, sortVideos, searchedShorts);
-      shortsHeading.forEach(heading => heading.style.display = 'none');
-      sortVideos.forEach(video => video.style.display = 'none');
-      searchedShorts.forEach(short => short.style.display = 'none');
+      shortsHeading.forEach(heading => { if (heading.style.display !== 'none') heading.style.display = 'none'; });
+      sortVideos.forEach(video => { if (video.style.display !== 'none') video.style.display = 'none'; });
+      searchedShorts.forEach(short => { if (short.style.display !== 'none') short.style.display = 'none'; });
       if (shortsNavigationTab && shortsNavigationTab.getAttribute('aria-hidden') !== 'true') {
-        shortsNavigationTab.style.display = 'none';
+        if (shortsNavigationTab.style.display !== 'none') shortsNavigationTab.style.display = 'none';
         shortsNavigationTab.setAttribute('aria-hidden', 'true');
       }
       videoCards.forEach(card => {
         if (card.innerHTML.toLowerCase().includes('shorts')) {
-          card.style.display = 'none';
+          if (card.style.display !== 'none') card.style.display = 'none';
         }
       });
     }
@@ -185,14 +189,14 @@ function loadSettingsAndFilter(targetNodes) {
         if (node.nodeType === 1) {
           if (node.matches && node.matches('#dismissible')) {
             if (filterMode === 'all') {
-              node.parentNode.style.display = '';
+              if (node.parentNode && node.parentNode.style.display !== '') node.parentNode.style.display = '';
             } else {
               filterVideoCard(node, beforeDate, afterDate, filterMode);
             }
           } else {
             node.querySelectorAll && node.querySelectorAll('#dismissible').forEach(card => {
               if (filterMode === 'all') {
-                card.parentNode.style.display = '';
+                if (card.parentNode && card.parentNode.style.display !== '') card.parentNode.style.display = '';
               } else {
                 filterVideoCard(card, beforeDate, afterDate, filterMode);
               }
@@ -211,7 +215,6 @@ function loadSettingsAndFilter(targetNodes) {
 loadSettingsAndFilter();
 applyOtherFilters();
 
-// debounce utility
 function debounce(fn, delay) {
   let timer = null;
   return function (...args) {
@@ -220,17 +223,17 @@ function debounce(fn, delay) {
   };
 }
 
-// observer for newly added nodes (debounced)
 const debouncedFilter = debounce(() => {
   loadSettingsAndFilter();
   applyOtherFilters();
-}, 10);
+}, 50);
 
+const mainContainer = document.querySelector('ytd-page-manager') || document.body;
 const observer = new MutationObserver((mutations) => {
   debouncedFilter();
 });
 
-observer.observe(document.body, { childList: true, subtree: true });
+observer.observe(mainContainer, { childList: true, subtree: true });
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
